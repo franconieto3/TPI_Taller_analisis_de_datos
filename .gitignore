@@ -1,0 +1,14 @@
+# Solo se versiona el código del ETL y los notebooks:
+# se ignora todo lo de la raíz salvo lo que se reincluye con "!"
+/*
+!/.gitignore
+!/ETL/
+!/notebooks/
+
+# Dentro de ETL, solo los scripts
+/ETL/*
+!/ETL/*.py
+
+# Archivos generados por Python y Jupyter
+__pycache__/
+.ipynb_checkpoints/
