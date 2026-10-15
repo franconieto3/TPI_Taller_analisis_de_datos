@@ -8,6 +8,7 @@
 # Dentro de ETL, solo los scripts
 /ETL/*
 !/ETL/*.py
+!/ETL/*.ipynb
 
 # Archivos generados por Python y Jupyter
 __pycache__/
