@@ -22,6 +22,10 @@ dos condiciones:
        /observations/latest, que es lo que pide get_observations) traiga todas
        las VARIABLES_REQUERIDAS. windDirection no se exige porque la API la
        deja en null con calma o viento variable;
+     - /observations/latest, consultado en el momento de la selección, traiga
+       las VARIABLES_REQUERIDAS (es exactamente lo que va a pedir
+       get_observations); si no, la estación se descarta y el muestreo elige
+       otra para ese hueco;
      - /points devuelva forecastHourly (las boyas del Golfo, por ejemplo, no
        tienen grilla de pronóstico).
    La verificación es perezosa: solo se verifican las candidatas que están por
@@ -121,6 +125,11 @@ def _parse(ts):
     return datetime.fromisoformat(ts.replace('Z', '+00:00'))
 
 
+def _completa(props):
+    """True si la observación trae todas las VARIABLES_REQUERIDAS."""
+    return all((props.get(v) or {}).get('value') is not None for v in VARIABLES_REQUERIDAS)
+
+
 def _distancia_km(lat1, lon1, lat2, lon2):
     """Haversine."""
     p1, p2 = math.radians(lat1), math.radians(lat2)
@@ -215,8 +224,7 @@ def verificar(estacion, ahora):
         mas_reciente = max(mas_reciente or ts, ts)
         hora = ts.replace(minute=0, second=0, microsecond=0)
         if hora < hora_fin and (hora not in ultima_por_hora or ts > ultima_por_hora[hora][0]):
-            completa = all((p.get(v) or {}).get('value') is not None for v in VARIABLES_REQUERIDAS)
-            ultima_por_hora[hora] = (ts, completa)
+            ultima_por_hora[hora] = (ts, _completa(p))
 
     if mas_reciente is None:
         return {'ok': False, 'motivo': 'sin_observaciones'}
@@ -225,6 +233,15 @@ def verificar(estacion, ahora):
     cobertura = sum(completa for _, completa in ultima_por_hora.values()) / VENTANA_HORAS
     if cobertura < UMBRAL_HORAS_COMPLETAS:
         return {'ok': False, 'motivo': 'variables_incompletas'}
+
+    # La misma consulta que hace get_observations: descarta las que hoy no
+    # devuelven las variables aunque su historial de la ventana esté completo.
+    try:
+        ultima = _get_json(f"{API}/stations/{station_id}/observations/latest")
+    except RuntimeError as e:
+        return {'ok': False, 'motivo': f'latest: {e}'}
+    if not _completa(ultima.get('properties') or {}):
+        return {'ok': False, 'motivo': 'latest_sin_variables'}
 
     try:
         punto = _get_json(f"{API}/points/{estacion['latitud']:.4f},{estacion['longitud']:.4f}")
