@@ -22,3 +22,15 @@
 # Archivos generados por Python y Jupyter
 __pycache__/
 .ipynb_checkpoints/
+
+# Dentro de TP3/dashboard, solo el codigo (los parquet/json los regenera precomputo.py)
+!/TP3/dashboard/
+/TP3/dashboard/*
+!/TP3/dashboard/*.py
+!/TP3/dashboard/.streamlit/
+
+# Documentacion de decisiones: los .md de cada TP (planes, pendientes, auditorias,
+# historial de hallazgos). Aportan el contexto de por que el pipeline es como es.
+!/TP2/*.md
+!/TP3/*.md
+!/*.md

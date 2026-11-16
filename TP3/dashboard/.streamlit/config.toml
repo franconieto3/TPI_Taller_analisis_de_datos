@@ -1,0 +1,12 @@
+# Tema fijo en claro: la paleta de los gráficos se validó contra una superficie clara
+# (ver paleta.py). Dejarlo a merced del tema del sistema haría que los colores se
+# rendericen sobre un fondo para el que no se validó el contraste.
+[theme]
+base = "light"
+primaryColor = "#2a78d6"
+backgroundColor = "#fcfcfb"
+secondaryBackgroundColor = "#f0efec"
+textColor = "#2e2d2b"
+
+[server]
+headless = true
