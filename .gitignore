@@ -40,6 +40,15 @@ __pycache__/
 /TP3/data/processed/*
 !/TP3/data/processed/dashboard/
 
+# Excepcion a "/TP3/*": las figuras y tablas que informe.md cita e incrusta (3,4 MB).
+# Sin esto el informe se lee con las imagenes rotas para cualquiera que clone el repo.
+# Solo estos dos directorios de data/out: el resto de las figuras ya se ven dentro de
+# los outputs de las notebooks que las generan.
+!/TP3/data/out/
+/TP3/data/out/*
+!/TP3/data/out/interpretabilidad/
+!/TP3/data/out/modelado_global/
+
 # Documentacion de decisiones: los .md de cada TP (planes, pendientes, auditorias,
 # historial de hallazgos). Aportan el contexto de por que el pipeline es como es.
 !/TP2/*.md

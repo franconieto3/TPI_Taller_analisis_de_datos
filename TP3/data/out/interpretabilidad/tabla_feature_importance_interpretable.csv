@@ -1,0 +1,27 @@
+,feature_importances_
+num__error_temp_c_lag24,0.40234597405720385
+num__error_temp_c_lag6,0.1674185999897948
+num__hora_sin,0.14673164043840828
+num__hora_cos,0.08911022142406881
+num__fcst_pop_pct,0.07085136807230175
+num__fcst_rh_pct,0.05468583947243463
+num__fcst_windspeed_kmh,0.024994784998216803
+num__obs_rh_pct_lag6,0.01693003796159286
+num__elevation,0.005637213085084485
+num__obs_dewpoint_c_lag6,0.004552265896842327
+num__fcst_temp_c,0.003539184015885641
+num__dist_agua_km,0.0029900910728251485
+num__obs_wind_direction_cos_lag6,0.00266858402883081
+num__error_temp_c_vecinas_lag6_mean,0.0026111827255520925
+num__obs_windspeed_kmh_lag6,0.00225195884490852
+num__dist_area_urbana_km,0.0015946652686489573
+num__area_urbana_km2,0.00040520903865756463
+num__obs_wind_direction_sin_lag6,0.00039757393375464676
+cat__bioma_Great Plains,0.00018230645190431329
+num__dist_aeropuerto_km,0.00010129922308377496
+num__error_temp_c_roll3_mean,0.0
+num__sobre_agua,0.0
+num__en_area_urbana,0.0
+cat__bioma_North American Deserts,0.0
+cat__bioma_Northern Forests,0.0
+cat__bioma_Northwestern Forested Mountains,0.0

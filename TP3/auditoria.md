@@ -86,8 +86,12 @@ cv_MAE_std (7-9 % entre folds).
   tres métodos; fcst_rh_pct y fcst_pop_pct son las covariables de pronóstico más relevantes; la geografía es
   marginal. La agrupación por bloques del dashboard (árbol → historia del error; RF → hora) es un hallazgo bueno para
   el informe.
-- *Mecanismo del mediodía*: diagnosticado con evidencia (colapso de $\rho(e_{t-6}, e_t)$ en 10-13 h). La
-  mejora es menor ahí y de noche (+10,5 a +18,3 %) que a la mañana (+26 a +39 %).
+- *Mecanismo del mediodía*: diagnosticado con evidencia (colapso de $\rho(e_{t-6}, e_t)$ en 10-13 h).
+  **Corregido el 2026-11-17**: el colapso es real, pero *no* se traduce en menor mejora. La ventana 10-14 h
+  mejora **+22,2 %**, por encima del promedio de las 24 h (+20,5 %); los tramos de menor ganancia son 15-16 h
+  (+12,3 %, con 15 h como mínimo del día, +8,6 %) y la noche 19-23 h (+11,1 %), contra +31,4 % a la mañana
+  (7-11 h). El modelo compensa el colapso de `lag6` con `hora_sin`/`hora_cos` y las variables de pronóstico.
+  Ver nb 8 §7 e informe §8.1/§8.3.
 - *SHAP local*: caso E7246 (residuo 8,7 °C) bien interpretado como anomalía no anticipable.
 - *Brechas, estado al 2026-11-16*: (1) SHAP del árbol ✅ resuelto (nb 8 §9.3, test completo); (2) dependence
   plots ✅ resueltos (los 3 pedidos, sobre el SHAP del árbol); (3) el beeswarm del **Random Forest** sigue con 100

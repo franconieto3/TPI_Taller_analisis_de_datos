@@ -1,0 +1,27 @@
+,coeficiente
+num__error_temp_c_lag6,0.6176619684812704
+num__error_temp_c_lag24,0.5756359659227928
+num__hora_sin,-0.26101780582499845
+num__error_temp_c_roll3_mean,-0.22322828647982193
+num__obs_dewpoint_c_lag6,0.22245423480866433
+num__fcst_temp_c,-0.203922986940491
+num__fcst_rh_pct,-0.19405419711179941
+num__fcst_windspeed_kmh,-0.1859801937383324
+num__obs_rh_pct_lag6,-0.15449249491472153
+num__fcst_pop_pct,0.14264116020153458
+num__obs_windspeed_kmh_lag6,0.1145575739729365
+cat__bioma_Northwestern Forested Mountains,-0.11091347153457545
+cat__bioma_Great Plains,0.08862614589287002
+num__obs_wind_direction_cos_lag6,0.06459621490649954
+num__dist_agua_km,-0.04615278523957693
+cat__bioma_North American Deserts,0.035838529795808205
+num__obs_wind_direction_sin_lag6,0.029607537522153407
+num__elevation,0.02730113167897366
+cat__bioma_Northern Forests,-0.018404222805034363
+num__error_temp_c_vecinas_lag6_mean,-0.017815748613759536
+num__hora_cos,-0.014153580815825118
+num__dist_aeropuerto_km,-0.009860497714277402
+num__en_area_urbana,0.0056497402864002875
+num__area_urbana_km2,0.005172548619909836
+num__dist_area_urbana_km,0.0012517814547062973
+num__sobre_agua,0.0010883795421825714

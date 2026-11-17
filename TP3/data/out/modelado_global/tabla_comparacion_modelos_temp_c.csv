@@ -1,0 +1,10 @@
+modelo,MAE_train,RMSE_train,MAE_test,RMSE_test,cv_MAE,cv_MAE_std,mejores_parametros,mejora_vs_cero_pct,MASE
+ridge,1.259,1.612,1.245,1.598,1.303,0.115,{'modelo__alpha': 1000},13.752,0.696
+lasso,1.281,1.639,1.27,1.622,1.279,0.105,{'modelo__alpha': 0.1},12.02,0.71
+elastic_net,1.279,1.637,1.268,1.62,1.28,0.105,"{'modelo__alpha': 0.1, 'modelo__l1_ratio': 0.9}",12.159,0.709
+knn,0.0,0.0,1.203,1.547,1.25,0.092,"{'modelo__n_neighbors': 100, 'modelo__weights': 'distance'}",16.662,0.672
+arbol,1.172,1.518,1.215,1.568,1.264,0.095,"{'modelo__max_depth': 8, 'modelo__min_samples_leaf': 50}",15.853,0.679
+random_forest,0.661,0.882,1.141,1.482,1.17,0.091,"{'modelo__min_samples_leaf': 5, 'modelo__max_features': 0.3, 'modelo__max_depth': 32, 'modelo__n_estimators': 450}",20.957,0.638
+gradient_boosting,1.028,1.333,1.159,1.504,1.182,0.085,"{'modelo__max_depth': 5, 'modelo__learning_rate': 0.05, 'modelo__l2_regularization': 1.0, 'modelo__max_iter': 450}",19.71,0.648
+cero (no corregir),,,1.444,,,,,0.0,0.807
+naive_estacional (mejor baseline),,,1.593,,,,,-10.334,0.89

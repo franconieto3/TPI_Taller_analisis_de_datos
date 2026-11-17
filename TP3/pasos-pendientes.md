@@ -1,7 +1,8 @@
 # TP3: secuencia de pasos pendientes
 
 _Consigna: `TP3/consigna/Consigna TP3.pdf`. Entrega 18/11/2026 (campus hasta el 19/11 23:59). Actualizado
-2026-11-16 tras la sesión de Etapa C (dashboard); antes, 2026-11-09 por la de Etapa A/B._
+2026-11-17 tras la revisión de entregabilidad (informe terminado, figuras citadas ahora versionadas); antes,
+2026-11-16 por la sesión de Etapa C (dashboard) y 2026-11-09 por la de Etapa A/B._
 
 _Para el detalle hallazgo por hallazgo de la revisión del pipeline (bugs encontrados, decisiones de feature
 engineering, hipótesis conversadas) ver `revision-pipeline-error.md` -este documento es el resumen de estado
@@ -36,13 +37,13 @@ separación train/test temporal (corte fijo, sin gap porque todas las features m
 
   | Modelo | MAE test | Mejora vs. "cero" | MASE |
   |---|---|---|---|
-  | **Random Forest** (mínimo error, entregable 2) | 1,141 | **+20,5%** | 0,638 |
-  | Gradient Boosting | 1,159 | +19,3% | 0,648 |
-  | KNN | 1,203 | +16,2% | 0,672 |
-  | **Árbol de decisión** (interpretable, entregable 1) | 1,215 | +15,4% | 0,679 |
-  | Ridge | 1,245 | +13,3% | 0,695 |
-  | ElasticNet | 1,268 | +11,7% | 0,708 |
-  | Lasso | 1,270 | +11,6% | 0,709 |
+  | **Random Forest** (mínimo error, entregable 2) | 1,141 | **+20,96%** | 0,638 |
+  | Gradient Boosting | 1,159 | +19,71% | 0,648 |
+  | KNN | 1,203 | +16,66% | 0,672 |
+  | **Árbol de decisión** (interpretable, entregable 1) | 1,215 | **+15,85%** | 0,679 |
+  | Ridge | 1,245 | +13,75% | 0,695 |
+  | ElasticNet | 1,268 | +12,16% | 0,708 |
+  | Lasso | 1,270 | +12,02% | 0,709 |
 
   (antes: RF 1,067/+14,0%, GB 1,069/+13,8%, árbol 1,135/+8,5%, KNN 1,148/+7,5%, Lasso/ElasticNet 1,154/+7,0%,
   Ridge 1,173/+5,5% -el MAE absoluto subió porque el nuevo test, más largo y representativo, cae en un tramo más
@@ -50,6 +51,13 @@ separación train/test temporal (corte fijo, sin gap porque todas las features m
   reordenó el medio de la tabla: Ridge ahora le gana a Lasso/ElasticNet, y KNN a el árbol). Hiperparámetros
   ganadores documentados en `data/out/modelado_global/tabla_comparacion_modelos_temp_c.csv` (columna
   `mejores_parametros`); `cv_MAE_std` (hallazgo 20) nueva, dispersión ~7-9% entre folds para todos los modelos.
+
+  > **Base de comparación.** Los porcentajes de la tabla se miden contra **1,4435°C**, que es el MAE de no
+  > corregir sobre las 47.151 filas que ven los modelos. No contra el 1,436°C de la notebook 6: esa notebook
+  > evalúa sobre 32.214 filas (su máscara exige los 4 lags disponibles). La tabla arrastraba el 1,436 hardcodeado
+  > y se corrigió el 2026-11-16 en la §12 de `7_modelado_global.ipynb`, que recalcula los baselines sobre
+  > `X_test` sin reentrenar nada. Informe, `tabla_comparacion_modelos_temp_c.csv`, notebook 8 y dashboard usan
+  > hoy la misma cifra. Ver §4 de `informe.md`.
 - **Evaluación** (MAE/RMSE pronóstico original vs. corregido): cubierta -el MAE del residuo del modelo equivale al
   MAE del pronóstico corregido contra la observación.
 - Se auditó la notebook (`auditoria.md`) y se aplicaron 2 de los 5 puntos propuestos: reintegrar
@@ -105,10 +113,21 @@ separación train/test temporal (corte fijo, sin gap porque todas las features m
 Para correrlo: `python TP3/dashboard/precomputo.py` y después
 `python -m streamlit run TP3/dashboard/app.py`.
 
-### 5. Informe (entregable 3) — 🔴 Pendiente, insumos ya listos
-Redactar comparando los dos modelos: performance (tabla de la Etapa A) e insight de interpretabilidad de cada uno
-(Etapa B -feature importance, SHAP, sesgo por hora/bioma, el hallazgo del mediodía). Todos los números y gráficos
-ya están generados en `data/out/modelado_global/` y `data/out/interpretabilidad/`, sólo falta la redacción.
+### 5. Informe (entregable 3) — ✅ hecho (v1 el 2026-11-16)
+
+`TP3/informe.md`: 12 secciones más dos anexos (reproducibilidad y glosario de métricas). Cubre lo que pide la
+consigna -comparación de performance entre los dos modelos e insight de interpretabilidad de cada uno- y además:
+convención de signo declarada al inicio (§0), el baseline tipo MOS como piso exigente (§4), la discusión central
+precisión vs. interpretabilidad (§10), limitaciones (§11) y trabajo futuro (§12).
+
+Toda métrica sale de `data/processed/dashboard/metricas.json` o de las tablas de `data/out/`, con la única
+excepción declarada en su §4 (el 1,436 de la notebook 6, ver la nota de la Etapa A arriba).
+
+**Figuras**: las 15 que el informe cita (`data/out/modelado_global/01_*.png` y
+`data/out/interpretabilidad/01_*` a `14_*.png`, más sus `tabla_*.csv`) **ya están versionadas** -excepción
+agregada al `.gitignore` el 2026-11-17-, porque antes el informe las citaba por nombre y no llegaban a nadie que
+clonara el repo. El resto de `data/out/` sigue fuera de git: esas figuras se ven dentro de los outputs de las
+notebooks que las generan.
 
 ## Ideas identificadas pero no implementadas (quedan para si hay tiempo)
 
@@ -123,15 +142,19 @@ De `auditoria.md`, puntos 1, 3 y 4 -ver análisis de viabilidad completo en la c
 
 ## Archivos clave para retomar
 
+- `TP3/informe.md`: el entregable 3 (ver §5 arriba). Es también el resumen más completo y actualizado de todo el
+  trabajo: si hay que retomar una cifra o una conclusión, ésa es la fuente.
 - `TP3/revision-pipeline-error.md`: historial detallado de hallazgos, bugs resueltos y decisiones de esta sesión
   (9 hallazgos documentados al 2026-11-09).
 - `TP3/auditoria.md`: los 5 puntos de la auditoría externa, con veredicto de viabilidad para cada uno.
 - `TP3/data/processed/modelos/modelo_interpretable_temp_c.joblib`, `modelo_min_error_temp_c.joblib`: los 2 modelos
   finales entrenados, listos para el dashboard o para re-evaluar sin reentrenar.
-- `TP3/data/out/modelado_global/`, `TP3/data/out/interpretabilidad/`: tablas y gráficos ya generados, insumo
-  directo para el informe (entregable 3).
+- `TP3/data/out/modelado_global/`, `TP3/data/out/interpretabilidad/`: las tablas y figuras que cita el informe.
+  Son los dos únicos directorios de `data/out/` versionados (excepción explícita en el `.gitignore`).
 - `TP3/notebooks/utils.py`: paleta y helpers de gráficos compartidos por todas las notebooks.
 - `TP3/plan-dashboard.md`: el diseño del dashboard (Etapa C) derivado de la Clase 13, con la justificación de cada
   panel, los filtros que se descartaron y por qué, y las decisiones de visualización y de incertidumbre.
 - `TP3/dashboard/`: `precomputo.py` (genera la fuente de datos), `app.py` (el tablero) y `paleta.py` (colores
-  compartidos con los notebooks). Los parquet/json que consume no se versionan: los regenera `precomputo.py`.
+  compartidos con los notebooks). Los parquet/json que consume **sí se versionan** (3,5 MB en
+  `data/processed/dashboard/`), para que el tablero abra en un clon limpio sin el `.joblib` de 1,1 GB;
+  `precomputo.py` los regenera cuando cambian los modelos.

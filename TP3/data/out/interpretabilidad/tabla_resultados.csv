@@ -1,0 +1,4 @@
+modelo,MAE_test,mejora_vs_cero_pct
+cero (no corregir),1.4435132392214447,0.0
+interpretable (DecisionTreeRegressor),1.2146743911959093,15.852909540958493
+mínimo error (RandomForestRegressor),1.1409904213077848,20.957398220803626

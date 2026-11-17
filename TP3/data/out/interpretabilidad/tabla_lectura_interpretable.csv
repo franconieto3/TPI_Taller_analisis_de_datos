@@ -1,0 +1,4 @@
+modelo,MAE_test,mejora_vs_cero_pct
+cero (no corregir),1.4435132392214447,0.0
+"DecisionTreeRegressor profundidad 8 (evaluado, entregable 1)",1.2146743911959093,15.852909540958493
+Ridge alpha=1000 (segunda lectura interpretable),1.2446982410381775,13.772994440321007

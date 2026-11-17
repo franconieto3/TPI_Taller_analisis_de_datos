@@ -1,0 +1,5 @@
+modelo,MAE_test,mejora_vs_cero_pct,mejora_vs_mos_pct
+cero (no corregir),1.4435132392214447,0.0,-8.540326983563528
+MOS: sesgo medio estación x hora (train),1.3299326428600484,7.868344624442491,0.0
+interpretable (DecisionTreeRegressor),1.2146743911959093,15.852909540958493,8.66647286860136
+mínimo error (RandomForestRegressor),1.1409904213077848,20.957398220803626,14.20690157254425

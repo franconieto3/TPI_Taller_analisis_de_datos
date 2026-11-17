@@ -1,0 +1,3 @@
+lluvia,sin_corregir,interpretable (DecisionTreeRegressor),mínimo error (RandomForestRegressor)
+pop < 30%,1.450080213787591,1.2170768205578235,1.1447384213823424
+pop >= 30%,1.2971718593340815,1.161137587548633,1.0574683218685366

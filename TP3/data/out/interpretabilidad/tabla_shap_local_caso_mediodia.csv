@@ -1,0 +1,27 @@
+,contribución SHAP (°C)
+num__error_temp_c_lag6,-0.26065885912574144
+num__hora_cos,-0.24805435402489728
+num__fcst_pop_pct,-0.22798605243417633
+num__dist_agua_km,-0.2183248152463227
+num__obs_dewpoint_c_lag6,-0.1825347732385408
+num__elevation,-0.12073839193886857
+num__fcst_temp_c,-0.07225808062369941
+num__fcst_windspeed_kmh,-0.057879367222091166
+num__obs_rh_pct_lag6,-0.04938149771981475
+num__obs_wind_direction_cos_lag6,0.047650530231234424
+num__error_temp_c_roll3_mean,-0.04493046166382848
+num__hora_sin,0.04132895436316248
+num__obs_windspeed_kmh_lag6,-0.036977811535105314
+num__dist_aeropuerto_km,-0.02843960835569703
+num__error_temp_c_vecinas_lag6_mean,-0.025346989665025348
+num__obs_wind_direction_sin_lag6,0.024104467844978633
+num__error_temp_c_lag24,0.023348641109282663
+num__area_urbana_km2,-0.018576574868915254
+num__fcst_rh_pct,0.016791421701028337
+cat__bioma_Great Plains,-0.013546294510860543
+num__dist_area_urbana_km,-0.004428060325146534
+cat__bioma_Northern Forests,-0.0008616075843887389
+num__en_area_urbana,-0.0007851392359684111
+cat__bioma_North American Deserts,-0.000703483450161407
+cat__bioma_Northwestern Forested Mountains,-0.00041527146101558594
+num__sobre_agua,-0.00011754149069318502
