@@ -2,8 +2,8 @@
 
 **Modelado del error de pronóstico — precisión vs. interpretabilidad**
 
-_Taller de Análisis de Datos 1 · Entrega 18/11/2026 · Variable objetivo: `temp_c` · Corrida oficial: 2026-11-15/16
-(dataset extendido, 27 días)._
+_Taller de Análisis de Datos 1 · Entrega 18/11/2026 · Variable objetivo: `temp_c` · Período: 19/10 al 15/11/2026
+(27 días)._
 
 ---
 
@@ -21,7 +21,7 @@ se escriba como una resta directa sobre el pronóstico:
 $$\hat{T}_{\text{corr}} = T_{\text{fcst}} - \hat{e}$$
 
 La equivalencia con la fórmula de la consigna es exacta tomando $\hat{E} = -\hat{e}$. La convención está aplicada
-de forma consistente en todas las notebooks 
+de forma consistente en todas las notebooks, en el precómputo del dashboard y en el dashboard mismo.
 
 ---
 
@@ -43,7 +43,7 @@ sobre las mismas 47.151 filas de test, contra 1,3299 °C del baseline tipo MOS.
 | Sesgo medio (°C) | −0,1353 | −0,0177 | +0,0157 |
 | Mejora de MAE vs. no corregir | — | −15,85 % | **−20,96 %** |
 
-_Fuente: `data/processed/dashboard/metricas.json` (corrida 2026-11-15)._
+_Fuente: `data/processed/dashboard/metricas.json`._
 
 Los tres hallazgos que sostienen la narrativa:
 
@@ -81,9 +81,17 @@ intermitencia inmanejable antes de cualquier modelado: aquellas que presentan hu
 
 ### 2.2 Validez del target
 
-No toda fila tiene un error observable. Hubo una indexación en cada estación a la grilla horaria completa y se imputaron los huecos cortos (< 12 h) por interpolación; una fila cuya observación fue imputada **no es un target
-legítimo**, porque el "error" sería contra un valor inventado. La columna `target_valido_temp_c` marca esto: el
-**79,6 %** de las filas tiene target válido para `temp_c` (87,9 % en test, 77,7 % en train).
+No toda fila tiene un error observable. Cada estación se llevó a la grilla horaria completa y los huecos cortos de
+la observación (< 12 h) se imputaron por interpolación; los huecos largos quedan vacíos. La columna
+`target_valido_temp_c` marca las filas donde el error se puede calcular, es decir, donde existe a la vez un
+pronóstico y una observación (medida o imputada por un hueco corto): el **79,6 %** de las filas tiene target válido
+para `temp_c` (87,9 % en test, 77,7 % en train).
+
+La decisión de **conservar como target las horas con observación imputada** es deliberada
+(`5_separacion_train_test.ipynb`): descartarlas haría perder targets en los bordes de cada hueco corto, donde la
+interpolación entre dos mediciones reales cercanas es confiable. Su costo es que una fracción del error se mide
+contra un valor interpolado y no observado; lo declaramos como limitación (§11) y el dashboard permite excluir esas
+horas con un filtro.
 
 La máscara efectiva de modelado exige además que ninguna feature sea NaN, lo que deja el 76,1 % citado arriba. Lo
 que se pierde son, sobre todo, filas sin lags disponibles (las primeras horas de cada estación y las posteriores a
@@ -96,7 +104,6 @@ diario marcado, así que mezclar filas futuras en train filtra información. Usa
 
 - `CORTE = 2026-11-10` → train = 2026-10-19 a 2026-11-09, test = 2026-11-10 a 2026-11-15.
 - Proporción **81 % / 19 %** en filas.
-- El corte se recalculó cuando el dataset se extendió de 15 a 27 días: estaba hardcodeado en una fecha que ya no daba el ~80/20 buscado.
 
 Además, **toda feature dinámica mira al menos 6 h hacia atrás**, que es el horizonte del pronóstico: si en el
 momento de emitir el pronóstico de las 12 h sólo se conoce lo observado hasta las 06 h, usar `lag1` sería fuga.
@@ -116,7 +123,7 @@ disponible.
 | Espacial | `error_temp_c_vecinas_lag6_mean` | Media del error de las K vecinas con 6 h de atraso |
 | Ciclo diario | `hora_sin`, `hora_cos` | Encoding cíclico; ver ablation en §5.3 |
 | Observado con atraso | `obs_rh_pct_lag6`, `obs_dewpoint_c_lag6`, `obs_windspeed_kmh_lag6`, `obs_wind_direction_sin/cos_lag6` | La humedad entró respaldada por CCF diferenciada contra el error; es el único candidato que sobrevivió al control |
-| Pronosticado | `fcst_temp_c`, `fcst_pop_pct`, `fcst_rh_pct`, `fcst_windspeed_kmh` | Los tres últimos se agregaron en la revisión de 2026-11-15 y los modelos efectivamente los usan |
+| Pronosticado | `fcst_temp_c`, `fcst_pop_pct`, `fcst_rh_pct`, `fcst_windspeed_kmh` | Disponibles en el momento de emitir el pronóstico, así que no hay fuga. Los modelos efectivamente los usan: `fcst_rh_pct` y `fcst_pop_pct` son las covariables de pronóstico más importantes en SHAP (§7) |
 | Geografía | `elevation`, `dist_agua_km`, `dist_aeropuerto_km`, `dist_area_urbana_km`, `area_urbana_km2`, `sobre_agua`, `en_area_urbana`, `bioma` | De `4_atributos_geograficos.ipynb` |
 
 **Descartes explícitos**:
@@ -172,17 +179,13 @@ que afirmar con precisión es:
    Random Forest (7,9 de 21,0 puntos). Buena parte del sesgo del pronóstico es estructural -cada estación falla
    de forma parecida a cada hora- y se captura sin ningún modelo.
 3. Los dos entregables le ganan **a ese** baseline, no sólo a no corregir: el árbol por 8,7 % y el bosque por
-   14,2 %. Esos dos tercios restantes son exactamente lo que aportan las features dinámicas (los lags del error,
+   14,2 %. Esos dos tercios restantes son lo que aportan las features dinámicas (los lags del error,
    la humedad observada y las variables del pronóstico del día), y son la justificación de haber entrenado un
    modelo en vez de publicar una tabla de sesgos.
 
-> **Nota sobre la cifra de referencia.** El MAE de no corregir vale 1,436 °C sobre las 32.214 filas que evalúa
-> la notebook 6 (su máscara exige los 4 lags) y **1,4435 °C sobre las 47.151 filas que ven los modelos**. Este
-> informe usa **1,4435** en todas las comparaciones con modelos. La tabla
-> `tabla_comparacion_modelos_temp_c.csv` arrastraba el 1,436 hardcodeado y daba 15,4 % para el árbol; se corrigió
-> el 2026-11-16 en la §12 de `7_modelado_global.ipynb`, que recalcula los baselines sobre `X_test` sin reentrenar
-> nada. **Informe, tabla, notebook 8 y dashboard usan hoy la misma cifra**: 15,853 % para el árbol y 20,957 %
-> para el Random Forest.
+> **Nota sobre la cifra de referencia.** No corregir da un MAE de 1,436 °C sobre las 32.214 filas de la notebook 6
+> y de **1,4435 °C sobre las 47.151 filas que ven los modelos**. Todas las comparaciones con modelos de este informe
+> usan 1,4435.
 
 ---
 
@@ -349,7 +352,7 @@ legible en un árbol.
 
 **(c) SHAP del árbol sobre el test completo** (`11_shap_summary_arbol.png`). A diferencia del Random Forest,
 acá no hace falta muestrear: TreeSHAP escala con (nº de árboles × hojas × profundidad²), y el árbol es
-1 × 232 × 8 contra 450 × ~17.000 × 32 del bosque — unas 5 × 10⁵ veces más barato por fila. Las 47.151 filas de
+1 × 232 × 8² contra 450 × ~17.000 × 32² del bosque — unas 5 × 10⁵ veces más barato por fila. Las 47.151 filas de
 test se calculan en ~2 s, así que el beeswarm del modelo interpretable **no tiene el problema estadístico** del
 de §7.2.
 
@@ -473,26 +476,33 @@ tratamiento de incertidumbre de §9: si no se puede predecir el evento, hay que 
 
 ### 8.1 Sesgo horario — corregido
 
-El TP2 identificó un sesgo diurno: el pronóstico falla distinto según la hora. Comparación pre/post por hora local
-(MAE del error sin corregir vs. MAE del residuo de cada modelo):
+El TP2 identificó un sesgo diurno: el pronóstico es frío y húmedo a la mañana y cálido y seco por la tarde, y la
+autocorrelación del error tiene picos a 24, 48 y 72 h. Comparación pre/post por hora local (MAE del error sin
+corregir vs. MAE del residuo de cada modelo):
 
 | | Sin corregir | Árbol | RF | Mejora RF |
 |---|---|---|---|---|
-| Mejor hora (8 h local) | 1,80 | 1,21 | 1,09 | **+39,3 %** |
-| Peor hora (15 h local) | 1,16 | 1,13 | 1,06 | +8,6 % |
-| Promedio de las 24 h | 1,44 | 1,22 | 1,14 | +20,5 % |
+| Hora de mayor mejora (8 h local) | 1,80 | 1,21 | 1,09 | **+39,3 %** |
+| Hora de menor mejora (15 h local) | 1,16 | 1,13 | 1,06 | +8,6 % |
+| Promedio simple de las 24 h | 1,44 | 1,22 | 1,14 | +20,5 % |
+
+_El promedio simple de las 24 horas (+20,5 %) difiere levemente del +20,96 % global porque no pondera por la
+cantidad de filas de cada hora._
 
 ![Figura 12. Sesgo por hora local, pre y post corrección: las 24 horas mejoran.](data/out/interpretabilidad/03_sesgo_por_hora_pre_post.png)
 
 _Figura 12. Sesgo por hora local, pre y post corrección: las 24 horas mejoran._
 
-**Las 24 horas del día mejoran, sin excepción**, con ambos modelos. Esto cambió respecto de la corrida anterior
-(dataset de 15 días), donde había un puñado de horas en que el modelo quedaba *peor* que no corregir: ese
-problema ya no existe.
+**Las 24 horas del día mejoran, sin excepción**, con ambos modelos.
 
-Las horas de mayor ganancia son las de la mañana (7-11 h: +26 a +39 %), que son justamente las de peor pronóstico
-base (MAE 1,51-1,80 °C). Las de menor ganancia son **15-16 h (+8,6 % y +15,9 %) y la franja nocturna 19-23 h
-(+10,5 a +11,5 %)**, que son horas donde el pronóstico base ya era relativamente bueno.
+El error sin corregir tiene **dos picos, uno en cada transición del ciclo diario**: la mañana (7-11 h, MAE
+1,51-1,80 °C) y el atardecer (17-18 h, 1,56 y 1,61 °C). Son las horas en que la temperatura cambia más rápido y
+un desfase de una o dos horas en el calentamiento o el enfriamiento que simula el modelo global se traduce en
+varios grados de error. Son también las horas de mayor ganancia: **+26 a +39 % a la mañana y +31,5 % y +26,3 %
+a las 17 y 18 h**. El corrector aprende el desfase sistemático de cada transición y lo resta.
+
+Las de menor ganancia son **las 15 h (+8,6 %) y la franja nocturna 19-23 h (+10,5 a +11,5 %)**, que son horas
+donde el pronóstico base ya era relativamente bueno.
 
 ### 8.2 Sesgo geográfico — corregido parcialmente
 
@@ -526,10 +536,21 @@ La correlación entre `error_temp_c_lag6` y el error real, calculada por hora lo
 
 _Figura 14. Colapso de ρ(`error_temp_c_lag6`, error) en el cruce por cero del ciclo diario._
 
-La feature en la que más confía el modelo deja de servir justo cuando el ciclo diario cruza por cero. El modelo
-compensa apoyándose en `hora_sin`/`hora_cos` y en las variables de pronóstico, que es por qué la ventana sigue
-mejorando pese al colapso; pero el margen es más chico y la varianza del residuo más alta. Es también la ventana
-donde cae el caso de §7.4.
+El último error conocido, que es la segunda feature más importante de los dos modelos detrás de `lag24`, deja de
+servir justo cuando el ciclo diario cruza por cero. A las 12-13 h, por ejemplo, `lag6` es el error de las 6-7 h,
+cuando rige el patrón frío de la mañana; al mediodía el error ya está virando hacia el patrón cálido de la tarde
+(§8.1), y por eso la correlación se anula o se vuelve levemente negativa.
+
+El efecto sobre la corrección depende de la hora:
+
+| Hora local | 10 h | 11 h | 12 h | 13 h | 14 h |
+|---|---|---|---|---|---|
+| Mejora RF | +32,9 % | +26,3 % | +16,2 % | +18,3 % | +17,0 % |
+
+A las 10 y 11 h la mejora sigue siendo alta, porque el error base todavía es el de la transición de la mañana y
+el modelo lo captura con `hora_sin`/`hora_cos`, `lag24` y las variables de pronóstico. A las 12-14 h, en cambio,
+la mejora cae por debajo del promedio (+16 a +18 % contra +20,5 %): sin un `lag6` informativo, el modelo pierde
+parte de su capacidad de corregir. Es también la ventana donde cae el caso de §7.4.
 
 ### 8.4 Lluvia y viento: los otros dos sesgos del TP2
 
@@ -565,13 +586,35 @@ muchos valores repetidos y `qcut` no puede partir los empates.
 El signo coincide con lo que ya decía el coeficiente de `fcst_windspeed_kmh` en Ridge (−0,186, §7.1): más viento
 pronosticado, menos sobreestimación. Dos técnicas independientes, la misma conclusión.
 
+**Diferencia con el TP2 sobre la lluvia.** En el TP2, una misma estación se equivocaba **más** en temperatura en
+las horas con PoP ≥ 30 % que en las de PoP < 10 % (+0,70 °C, p < 0,0001). Acá el resultado es el opuesto, pero las
+dos comparaciones no son la misma: (a) el TP2 comparaba dentro de cada estación y contra PoP < 10 %, mientras que
+esta tabla junta todas las estaciones y compara contra PoP < 30 %; (b) el TP2 trabajó con una ventana anterior,
+de octubre, donde los errores grandes venían de tormentas de tarde, y esta tabla usa sólo los 5 días de test de
+noviembre, con 2.025 filas de lluvia. No alcanza para decir que el efecto de la lluvia cambió de signo, pero sí para no afirmar ninguna de las dos
+direcciones como un hallazgo firme.
+
+### 8.5 Resumen: las hipótesis del TP2 frente a los modelos del TP3
+
+| Hallazgo del TP2 | ¿Qué hizo el modelo del TP3? |
+|---|---|
+| **Sesgo diurno** (frío a la mañana, cálido por la tarde; ACF con picos a 24/48/72 h) | **Corregido.** La hora (`hora_sin`/`hora_cos`) y `lag24` son las features más importantes, las 24 horas mejoran y el sesgo medio cae de −0,135 °C a ±0,02 °C (§8.1) |
+| **Persistencia del error** (ACF alta a pocas horas) | **Capturada** con `lag6`, salvo cuando colapsa en el cruce por cero del mediodía (§8.3) |
+| **Elevación / latitud** (más alto o más al norte, peor pronóstico) | **Corregido parcialmente.** El bioma de montaña sigue siendo el peor (1,84 °C después de corregir), pero la brecha entre biomas se achica de 0,99 a 0,86 °C (§8.2) |
+| **Distancia a agua, aeropuerto y área urbana** (asociadas al MAE de cada estación) | **Casi sin peso en el modelo** (geografía ≤ 6,8 % de la importancia, §7.3). No contradice al TP2: esas variables explican por qué una estación tiene más error *en promedio*, y ese nivel ya lo informan `lag24` y `lag6` de la misma estación |
+| **Lluvia** (PoP ≥ 30 % empeora el pronóstico de temperatura) | **No se replica en el test** (ver arriba); los modelos mejoran igual con y sin lluvia (+18,5 % y +21,1 %) |
+| **Sesgo del viento** (sobreestimación en el 85 % de las estaciones, +2,8 km/h) | **Fuera de alcance**: el TP3 modela la temperatura. El viento entra sólo como feature (`fcst_windspeed_kmh`), con efecto negativo sobre el error de temperatura |
+
 ---
 
-## 9. Incertidumbre: banda conformal del 80 %
+## 9. Incertidumbre y dashboard
+
+### 9.1 Banda conformal del 80 %
 
 Un valor puntual corregido oculta el riesgo, y la decisión de un usuario (un productor agropecuario, por ejemplo)
-depende del peor caso plausible, no del promedio. Por eso el precómputo del dashboard genera un **intervalo del
-80 % estilo split-conformal por (bioma, franja horaria)**.
+depende del peor caso plausible, no del promedio. Por eso el precómputo del dashboard genera, sobre el pronóstico
+corregido por el **Random Forest**, un **intervalo del 80 % estilo split-conformal por (bioma, franja
+horaria)**: los cuantiles 10 y 90 del residuo de calibración en cada grupo.
 
 El punto metodológico importante: split-conformal necesita un set de calibración que el modelo no haya visto.
 Reentrenar dejando una ventana afuera era inviable (el bosque pesa 1,1 GB), así que **partimos el test en dos
@@ -588,6 +631,40 @@ La banda calibra bien (81,3 % contra 80 % nominal). Y el dato que vale la pena c
 1,14 °C de MAE**. El error típico es chico, pero el rango plausible no lo es — exactamente la lección del caso
 E7246.
 
+Los dos días de calibración no se usan para nada más: ni para entrenar ni para elegir modelos, y las métricas de
+§5-§8 se calculan sobre el test completo con los modelos ya entrenados. La alternativa obvia, calibrar con
+residuos de train, daba una cobertura de 55,4 % contra el 80 % nominal: el Random Forest sobreajusta (§10) y sus
+residuos de train son demasiado chicos para representar el error real.
+
+### 9.2 Dashboard (Etapa C)
+
+El tablero (`dashboard/app.py`, Streamlit + Altair) está pensado para un tomador de decisiones que necesita saber
+**cuánto confiar en el pronóstico**, y se organiza en tres niveles de lectura:
+
+| Pestaña | Para quién | Qué muestra |
+|---|---|---|
+| **Resumen** | Tomador de decisiones | KPIs (MAE corregido, % de horas con error ≤ 1 °C, MASE, cobertura de la banda); la **vista de monitoreo**: por estación, la serie de observado, pronóstico y pronóstico corregido con la banda del 80 %, más el error con signo antes y después de corregir; y el mapa de mejora por estación |
+| **Explicabilidad** | Analista | Importancia de las variables agrupadas por bloques, SHAP del Random Forest (global y un caso local), sesgo pre/post por hora y por bioma |
+| **Detalle técnico** | Quien mantiene el modelo | Distribución del error y su P90 por hora, comparación de las 7 familias con `cv_MAE_std`, cobertura de datos y validez del target, construcción de la banda del 80 % |
+
+**Filtros dinámicos** (los que pide la consigna, dentro de un formulario con botón "Aplicar" para no recalcular a
+cada clic): **ubicación** por estado y por bioma, **rango horario** por franjas de 6 h, **condición
+meteorológica** con lluvia pronosticada (PoP ≥ 50 %) o sin ella, y la opción de excluir las horas con observación
+imputada (§2.2). Los filtros actúan sobre Explicabilidad y Detalle técnico; el Resumen queda fijo a propósito,
+porque sus títulos enuncian conclusiones sobre todo el test y un filtro las dejaría desactualizadas.
+
+El dashboard no carga los modelos en vivo (el Random Forest pesa 1,1 GB): `dashboard/precomputo.py` predice una
+vez sobre el test y deja 3,5 MB de parquet/json en `data/processed/dashboard/`, que están versionados. Para
+correrlo desde un clon limpio:
+
+```bash
+pip install -r TP3/dashboard/requirements.txt
+python -m streamlit run TP3/dashboard/app.py
+```
+
+Dos simplificaciones que conviene conocer: la hora se filtra por franjas de 6 h y no por un rango libre, y el
+umbral de lluvia del filtro es PoP ≥ 50 %, más exigente que el 30 % que usa este informe en §8.4.
+
 ---
 
 ## 10. La discusión central: precisión vs. interpretabilidad
@@ -600,7 +677,7 @@ E7246.
 | Explicación | Reglas legibles + coeficientes de Ridge como apoyo | SHAP (costoso) |
 | Costo de explicar una predicción | Recorrer 8 decisiones | TreeSHAP: muestra limitada a 100 filas |
 | Sobreajuste (MAE train → test) | 1,172 → 1,215 (**+3,7 %**) | 0,661 → 1,141 (**+72,6 %**) |
-| Auditable por un no técnico | Sí | No |
+| Auditable por un no técnico | Parcialmente: los primeros niveles del árbol (Fig. 3), no las 232 hojas | No |
 
 **El costo de la interpretabilidad es 0,074 °C de MAE** (5,1 puntos porcentuales de mejora). Dicho de otro modo:
 el árbol captura **el 76 % de la ganancia** que logra el Random Forest, con un artefacto 29.000 veces más chico y
@@ -628,9 +705,10 @@ Ordenadas por impacto sobre las conclusiones:
    mitiga reportando `cv_MAE_std` (dispersión de 7-9 % entre folds), pero un período meteorológicamente atípico
    movería los números. Es la limitación más seria.
 2. **El test también eligió la familia de modelos.** El ganador se seleccionó por `MAE_test`, no por `cv_MAE`, lo
-   que introduce un sesgo optimista de selección. El ranking por `cv_MAE` coincide en la cima (RF 1,170 < GB 1,182
-   < KNN 1,250 < árbol 1,264), así que la conclusión no cambia, pero la cifra de test es optimista como estimador
-   insesgado.
+   que introduce un sesgo optimista de selección. El ranking por `cv_MAE` coincide en las dos elecciones: entre
+   todos (RF 1,170 < GB 1,182 < KNN 1,250 < árbol 1,264) y entre los interpretables (árbol 1,264 < Lasso 1,279 <
+   Elastic Net 1,280 < Ridge 1,303). Los dos entregables serían los mismos, pero la cifra de test es optimista como
+   estimador insesgado.
 3. **Folds de CV partidos por posición de fila.** `TimeSeriesSplit` corta el panel apilado por índice, no por
    timestamp: una misma `target_hour_utc` puede quedar a ambos lados de un corte y, como las estaciones están
    correlacionadas espacialmente, hay una fuga mínima dentro de la CV. No afecta al holdout final.
@@ -643,9 +721,9 @@ Ordenadas por impacto sobre las conclusiones:
    estadísticamente pobre para las features de cola; el orden del top-4 es robusto, el resto no debe leerse como
    un ranking firme. El del árbol sí usa el test completo (§7.1), así que la lectura fina de interpretabilidad
    hay que apoyarla en ése.
-7. **El target se calcula también sobre observaciones imputadas** por interpolación corta (< 12 h). El efecto
-   está cuantificado en la auditoría y es menor, y el dashboard tiene un filtro para excluir esas filas; aun así,
-   una fracción del "error" que el modelo aprende se mide contra un valor interpolado, no observado.
+7. **El target se calcula también sobre observaciones imputadas** por interpolación corta (< 12 h), por decisión
+   explícita (§2.2). El dashboard tiene un filtro para excluir esas filas; aun así, una fracción del "error" que el
+   modelo aprende se mide contra un valor interpolado, no observado.
 8. **La señal de lluvia es débil**: 2.025 filas con `pop ≥ 30 %` sobre 47.151 (§8.4). La dirección del efecto
    es consistente con el coeficiente de viento de Ridge, pero no es una muestra para sacar conclusiones fuertes.
 
@@ -653,7 +731,8 @@ Ordenadas por impacto sobre las conclusiones:
 
 ## 12. Trabajo futuro
 
-- Selección del modelo final por `cv_MAE` en vez de `MAE_test`, o demostración de que el ranking coincide.
+- Selección del modelo final por `cv_MAE` desde el pipeline, en vez de `MAE_test` (hoy sólo verificamos a
+  posteriori que el ranking coincide, §11).
 - Más filas de SHAP para el Random Forest (hoy 100): exige un modelo más liviano, por ejemplo el Gradient
   Boosting.
 - Un baseline MOS más fino (estación × hora × condición de cielo) para ver cuánto más del margen del modelo es
