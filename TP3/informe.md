@@ -112,11 +112,11 @@ disponible.
 
 | Grupo | Features | Decisión y evidencia |
 |---|---|---|
-| Historia del error | `error_temp_c_lag6`, `error_temp_c_lag24`, `error_temp_c_roll3_mean` | Lags elegidos con PACF sobre la serie diferenciada. `lag48` se descartó por redundante con `lag24` (hallazgo 5) |
+| Historia del error | `error_temp_c_lag6`, `error_temp_c_lag24`, `error_temp_c_roll3_mean` | Lags elegidos con PACF sobre la serie diferenciada. `lag48` se descartó por redundante con `lag24` |
 | Espacial | `error_temp_c_vecinas_lag6_mean` | Media del error de las K vecinas con 6 h de atraso |
 | Ciclo diario | `hora_sin`, `hora_cos` | Encoding cíclico; ver ablation en §5.3 |
-| Observado con atraso | `obs_rh_pct_lag6`, `obs_dewpoint_c_lag6`, `obs_windspeed_kmh_lag6`, `obs_wind_direction_sin/cos_lag6` | La humedad entró respaldada por CCF diferenciada contra el error (hallazgo 6); es el único candidato que sobrevivió al control |
-| Pronosticado | `fcst_temp_c`, `fcst_pop_pct`, `fcst_rh_pct`, `fcst_windspeed_kmh` | Los tres últimos se agregaron en la revisión de 2026-11-15 (hallazgo 19) y los modelos efectivamente los usan |
+| Observado con atraso | `obs_rh_pct_lag6`, `obs_dewpoint_c_lag6`, `obs_windspeed_kmh_lag6`, `obs_wind_direction_sin/cos_lag6` | La humedad entró respaldada por CCF diferenciada contra el error; es el único candidato que sobrevivió al control |
+| Pronosticado | `fcst_temp_c`, `fcst_pop_pct`, `fcst_rh_pct`, `fcst_windspeed_kmh` | Los tres últimos se agregaron en la revisión de 2026-11-15 y los modelos efectivamente los usan |
 | Geografía | `elevation`, `dist_agua_km`, `dist_aeropuerto_km`, `dist_area_urbana_km`, `area_urbana_km2`, `sobre_agua`, `en_area_urbana`, `bioma` | De `4_atributos_geograficos.ipynb` |
 
 **Descartes explícitos**:
@@ -243,7 +243,7 @@ tienen MASE < 1; los baselines de la notebook 6, salvo "no corregir", no.
 - **Encoding de la hora**: se probó `hora_local` categórica (one-hot de 24 columnas) contra el par cíclico
   `hora_sin`/`hora_cos` en los tres modelos de árbol. La cíclica gana en los tres: el árbol empeora **3,14 %**
   (1,215 → 1,253), el RF **1,27 %** y el GB **0,63 %**. Los 24 one-hot dispersan las particiones sin aportar
-  información nueva. Se mantiene el encoding cíclico (hallazgo 18, refutado empíricamente).
+  información nueva. Se mantiene el encoding cíclico.
 - **Elección de los dos entregables**: "mínimo error" = mejor `MAE_test` entre los 5 modelos; "interpretable" =
   mejor `MAE_test` entre los 4 candidatos interpretables (Ridge, Lasso, Elastic Net, árbol). KNN quedó excluido
   del entregable 1 a propósito: no da coeficientes ni importancias, y su `MAE_train = 0` (con
@@ -494,17 +494,6 @@ Las horas de mayor ganancia son las de la mañana (7-11 h: +26 a +39 %), que son
 base (MAE 1,51-1,80 °C). Las de menor ganancia son **15-16 h (+8,6 % y +15,9 %) y la franja nocturna 19-23 h
 (+10,5 a +11,5 %)**, que son horas donde el pronóstico base ya era relativamente bueno.
 
-> **Corrección sobre la narrativa previa.** La notebook 8 y la auditoría describían la ventana 10-14 h como
-> "donde el modelo mejora menos". Con el dataset extendido eso ya no es exacto: la ventana 10-14 h mejora
-> **+22,2 %** en promedio (por encima de la media de las 24 h, +20,5 %), y las franjas más flojas son 15-16 h
-> (+12,3 %) y 19-23 h (+11,1 %). Lo que sí sigue siendo cierto es el mecanismo de §8.3. **Corregido el
-> 2026-11-17** en `8_interpretabilidad.ipynb` (§7 y §10) y en `auditoria.md`: las tres fuentes dicen hoy lo mismo.
-
-_Nota sobre qué promedio es cuál: el **+20,5 %** de la fila "promedio de las 24 h" es la media simple de las 24
-mejoras horarias, que es lo comparable con los tramos de esta sección. La mejora global del Random Forest,
-**+20,96 %** (§1 y §5.2), es sobre las 47.151 filas de test, donde cada hora pesa según cuántas filas aporta.
-Son la misma magnitud medida con distinto peso, no dos resultados distintos._
-
 ### 8.2 Sesgo geográfico — corregido parcialmente
 
 | Bioma | Sin corregir | Árbol | RF | Mejora RF |
@@ -576,11 +565,6 @@ muchos valores repetidos y `qcut` no puede partir los empates.
 El signo coincide con lo que ya decía el coeficiente de `fcst_windspeed_kmh` en Ridge (−0,186, §7.1): más viento
 pronosticado, menos sobreestimación. Dos técnicas independientes, la misma conclusión.
 
-**Alcance del sesgo de viento**: el TP2 detectó una sobreestimación de la *velocidad del viento*, y eso es un
-sesgo sobre `windspeed_kmh`, no sobre `temp_c`. Corregirlo exigiría entrenar un segundo modelo con otro target y
-queda fuera del alcance de este TP3. Lo que sí respondemos acá es la pregunta vecina: cómo se comporta el error
-de temperatura cuando se pronostica viento alto.
-
 ---
 
 ## 9. Incertidumbre: banda conformal del 80 %
@@ -633,10 +617,6 @@ Tres consideraciones que matizan la elección:
 3. **El peso del modelo tuvo consecuencias metodológicas reales**, no sólo de infraestructura: forzó a bajar la
    muestra de SHAP de 500 a 100 filas e impidió reentrenar para la calibración conformal. La interpretabilidad y
    la precisión no son sólo un tradeoff de métricas: el modelo más preciso es también el más difícil de auditar.
-
-**Recomendación**: para producción, Gradient Boosting (precisión casi idéntica, operable). Para comunicar a un
-tomador de decisiones y para auditar el comportamiento del corrector, el árbol de profundidad 8 con su vista a
-profundidad 3. El Random Forest justifica su lugar como cota superior de lo alcanzable con estas features.
 
 ---
 
