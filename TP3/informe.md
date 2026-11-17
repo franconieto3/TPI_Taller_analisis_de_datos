@@ -180,11 +180,13 @@ que afirmar con precisión es:
    la humedad observada y las variables del pronóstico del día), y son la justificación de haber entrenado un
    modelo en vez de publicar una tabla de sesgos.
 
-> **Nota sobre la cifra de referencia.** El MAE de no corregir vale 1,436 °C sobre las 32.214 filas de los
-> baselines y **1,4435 °C sobre las 47.151 filas que ven los modelos** (la máscara de features es distinta). Este
-> informe usa **1,4435** en todas las comparaciones con modelos, que es la cifra que también usa el dashboard. La
-> tabla `tabla_comparacion_modelos_temp_c.csv` de la notebook 7 arrastra el 1,436 hardcodeado, y por eso allí el
-> árbol figura con 15,4 % de mejora en vez de 15,85 %. Es la misma diferencia, no dos resultados distintos.
+> **Nota sobre la cifra de referencia.** El MAE de no corregir vale 1,436 °C sobre las 32.214 filas que evalúa
+> la notebook 6 (su máscara exige los 4 lags) y **1,4435 °C sobre las 47.151 filas que ven los modelos**. Este
+> informe usa **1,4435** en todas las comparaciones con modelos. La tabla
+> `tabla_comparacion_modelos_temp_c.csv` arrastraba el 1,436 hardcodeado y daba 15,4 % para el árbol; se corrigió
+> el 2026-11-16 en la §12 de `7_modelado_global.ipynb`, que recalcula los baselines sobre `X_test` sin reentrenar
+> nada. **Informe, tabla, notebook 8 y dashboard usan hoy la misma cifra**: 15,853 % para el árbol y 20,957 %
+> para el Random Forest.
 
 ---
 

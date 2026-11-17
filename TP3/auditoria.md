@@ -13,8 +13,8 @@ ajustes menores.*
 un tercero y cifras unificadas-, más E4, E8 y E9. Ver las filas marcadas ✅ abajo.*
 
 - *Etapa A (modelado)*: sólida. Target bien definido, 5 baselines explícitos, TimeSeriesSplit en el tuning,
-  holdout cronológico 81/19, 7 modelos comparados con MAE/RMSE/MASE. Random Forest (MAE 1,141 °C, −20,5/21,0 % vs.
-  no corregir) y árbol de decisión (1,215 °C, −15,4 %). Las 4 notebooks clave (5-8) no tienen celdas con error ni
+  holdout cronológico 81/19, 7 modelos comparados con MAE/RMSE/MASE. Random Forest (MAE 1,141 °C, −20,96 % vs.
+  no corregir) y árbol de decisión (1,215 °C, −15,85 %; cifras unificadas el 2026-11-16, ver E3). Las 4 notebooks clave (5-8) no tienen celdas con error ni
   celdas sin ejecutar.
 - *Etapa B (interpretabilidad)*: buena cobertura (impureza, permutación, SHAP global + local, sesgo pre/post por
   hora y bioma; el árbol explicativo y los coeficientes de Ridge se agregaron en la §8 de la nb 8 el 2026-11-16).
@@ -30,12 +30,12 @@ un tercero y cifras unificadas-, más E4, E8 y E9. Ver las filas marcadas ✅ ab
 
 | Entregable / Requisito | Estado | Hallazgo / Brecha | Acción correctiva recomendada |
 |---|---|---|---|
-| 1. Modelo interpretable (pipeline + CV + métricas) | 🟢 *(resuelto 2026-11-16)* | 7_modelado_global.ipynb: árbol max_depth=8, min_samples_leaf=50 elegido entre Ridge/Lasso/ElasticNet/árbol; son 232 hojas (no 256). La §8 nueva de 8_interpretabilidad.ipynb agrega las dos lecturas que faltaban: **árbol explicativo** (plot_tree/export_text con max_depth=3 → `08_arbol_explicativo_d3.png`) y **Ridge** alpha=1000 re-ajustado, MAE 1,245 (→ `09_coeficientes_ridge.png`, `tabla_coeficientes_ridge.csv`) | Nada pendiente en código. Para el informe: (a) `max_depth=3` trunca *la visualización, no el modelo*, así que no hay que declarar ningún modelo alternativo -sólo que las ramas grises están colapsadas-; (b) los cortes de hora están sobre `hora_sin`/`hora_cos` y hay que traducirlos (la §8 incluye la tabla de equivalencias); (c) usar una sola cifra de mejora del árbol: 15,85 % con `cero = 1,4435` (ver E3), no el 15,4 % de la nb 7 |
+| 1. Modelo interpretable (pipeline + CV + métricas) | 🟢 *(resuelto 2026-11-16)* | 7_modelado_global.ipynb: árbol max_depth=8, min_samples_leaf=50 elegido entre Ridge/Lasso/ElasticNet/árbol; son 232 hojas (no 256). La §8 nueva de 8_interpretabilidad.ipynb agrega las dos lecturas que faltaban: **árbol explicativo** (plot_tree/export_text con max_depth=3 → `08_arbol_explicativo_d3.png`) y **Ridge** alpha=1000 re-ajustado, MAE 1,245 (→ `09_coeficientes_ridge.png`, `tabla_coeficientes_ridge.csv`) | Nada pendiente en código. Para el informe: (a) `max_depth=3` trunca *la visualización, no el modelo*, así que no hay que declarar ningún modelo alternativo -sólo que las ramas grises están colapsadas-; (b) los cortes de hora están sobre `hora_sin`/`hora_cos` y hay que traducirlos (la §8 incluye la tabla de equivalencias); (c) la cifra de mejora del árbol es 15,85 % con `cero = 1,4435`, ya unificada en la nb 7 (E3 resuelto) |
 | 2. Modelo de precisión (pipeline + CV + métricas) | 🟢 | Random Forest con HalvingRandomSearchCV + TimeSeriesSplit(5), MAE test 1,141, MASE 0,638, cv_MAE_std reportado | Mencionar sobreajuste (MAE train 0,661 vs. test 1,141) y que GB queda a 0,018 °C con un modelo ~100× más liviano |
 | 3. Informe técnico (precisión vs. interpretabilidad) | 🟡 *(v1 escrita 2026-11-16)* | `TP3/informe.md`: 12 secciones + 2 anexos, con convención de signo, datos y split, baselines (incluido el MOS nuevo), los 7 modelos, interpretabilidad de cada uno, sesgos pre/post (hora, bioma, lluvia, viento), banda conformal, tradeoff y limitaciones | Falta la revisión del grupo. Pendiente de decisión: formato de entrega (el .md o un PDF) |
 | 4. Dashboard funcional | 🟢 *(resuelto 2026-11-16)* | Los 3,5 MB de data/processed/dashboard/ quedaron versionados con una excepción acotada en .gitignore, y se agregaron dashboard/requirements.txt (sólo lo que app.py necesita) y requirements-precomputo.txt. Verificado con un clon limpio: los 6 archivos bajan intactos y app.py los encuentra | Nada bloqueante. Opcional: desplegar en Streamlit Community Cloud y entregar también el link |
 | Target = error del pronóstico | 🟢 | error_temp_c = fcst − obs (convención inversa a la de la consigna, obs − fcst), pero consistente: fcst_corregido = fcst − ê en precomputo.py | Declarar la convención en la primera página del informe y en el dashboard (ya está en el caption) para evitar que el jurado lea el signo al revés |
-| Baselines explícitos | 🟢 | 6_baselines_globales.ipynb: cero, naive, naive estacional, media móvil, drift + MASE; más el baseline MOS (sesgo medio estación × hora) agregado en nb 8 §9.1 | Ver Error E3 (población distinta). E4 resuelto: el MOS da 1,330 y sí le gana a no corregir |
+| Baselines explícitos | 🟢 | 6_baselines_globales.ipynb: cero, naive, naive estacional, media móvil, drift + MASE; más el baseline MOS (sesgo medio estación × hora) agregado en nb 8 §9.1 | E3 y E4 resueltos: los baselines se recalculan sobre la población de los modelos (nb 7 §12) y el MOS da 1,330, que sí le gana a no corregir |
 | Validación temporal | 🟢 | Split por fecha (CORTE = 2026-11-10), CV con TimeSeriesSplit, assert de orden cronológico; features ancladas en shift(6) | Ver Error E5 (folds partidos por filas, no por timestamp) |
 | Comparación Error NWS vs. Refinado | 🟢 | Barras MAE (nb 7), MAE por hora/bioma pre-post (nb 8), KPIs + series en dashboard | — |
 | SHAP / Feature Importance en ambos modelos | 🟢 *(resuelto 2026-11-16)* | nb 8 §9.3: TreeExplainer sobre el árbol con las **47.151 filas de test** (2,1 s) + 3 dependence plots. El RF conserva impureza, permutación y SHAP con n=100 | Nada bloqueante. Para subir las 100 filas del RF haría falta un modelo más liviano (GB); declarado como limitación en el informe (§11) |
@@ -115,7 +115,7 @@ cv_MAE_std (7-9 % entre folds).
 |---|---|---|---|---|
 | E1 | Informe | Entregable obligatorio inexistente a 1 día de la entrega | *Alta* | Redactarlo primero, antes de cualquier mejora técnica |
 | E2 | Dashboard / git | Parquet/json del tablero y modelos fuera de git; precomputo.py depende de un .joblib de 1,1 GB. El jurado no puede ejecutarlo | *Alta* | Subir data/processed/dashboard/ (3,4 MB) con una excepción en .gitignore, requirements.txt con versiones fijas, o deploy en Streamlit Cloud |
-| E3 | nb 6 → nb 7 | BASELINES_NOTEBOOK_6 está hardcodeado (cero = 1,436) y se calculó sobre las 54.243 filas de test; los modelos se evalúan sobre 47.151 (máscara de features). Por eso mejora_vs_cero da 20,5 % en nb 7 y 21,0 % en nb 8 / dashboard (cero = 1,4435) | *Media* | Recalcular cero y naive estacional sobre X_test en la nb 7 y usar un solo número en informe y tablero |
+| E3 | nb 6 → nb 7 | ✅ **RESUELTO (2026-11-16)** en la §12 nueva de nb 7, que recalcula los baselines sobre X_test y reescribe el CSV y la figura **sin reentrenar nada** (~8 s; re-ejecutar la nb 7 entera habría costado 2-4 h). Corrección del enunciado original: los baselines de la nb 6 se midieron sobre **32.214** filas de test, no 54.243 -su máscara exige los 4 lags-, contra las 47.151 de los modelos | *Media* | Hecho. Las mejoras subieron +0,4 pp de forma uniforme (RF 20,5 → 20,96 %, árbol 15,4 → 15,85 %) y ningún ranking cambió. El MASE ya estaba bien: la nb 7 calculaba la persistencia sobre X_test |
 | E4 | nb 6 | ✅ **RESUELTO (2026-11-16)**, en nb 8 §9.1 en vez de nb 6/7, para no re-ejecutar el tuning del RF. Resultado: el MOS da **MAE 1,330**, así que **sí le gana a no corregir** (−7,9 %) -la afirmación "ningún baseline supera al pronóstico crudo" valía sólo para los 4 de persistencia-. El árbol le gana por 8,7 % y el RF por 14,2 % | *Media* | Hecho. El informe (§4) ya está reescrito con esta tabla: el margen honesto del modelo es el 14,2 % sobre MOS, no el 21,0 % sobre no corregir |
 | E5 | nb 7, CV | TimeSeriesSplit parte por posición de fila sobre el panel apilado: un mismo target_hour_utc puede quedar a ambos lados de un corte. Fuga mínima (misma hora, otras estaciones correlacionadas espacialmente) | Baja | Definir folds por timestamp (GroupKFold cronológico o cortes por fecha); al menos mencionarlo |
 | E6 | nb 7, selección | El modelo final se elige por MAE_test, no por cv_MAE: sesgo optimista de selección | Media | Elegir por cv_MAE (o mostrar que el ranking coincide) y declararlo en el informe |
@@ -134,13 +134,14 @@ cv_MAE_std (7-9 % entre folds).
   la revisión del grupo. Estructura: problema y convención de signo → datos y split → baselines
   (ninguno gana a no corregir) → 7 modelos (tabla con MAE/RMSE/MASE/cv_std) → interpretabilidad de cada modelo
   (bloques historia vs. hora) → sesgos pre/post (hora, bioma, lluvia) → incertidumbre conformal → tradeoff
-  interpretabilidad vs. precisión (árbol −15,4 % vs. RF −20,5 %, 40 KB vs. 1,1 GB) → limitaciones (mediodía,
+  interpretabilidad vs. precisión (árbol −15,85 % vs. RF −20,96 %, 38 KB vs. 1,1 GB) → limitaciones (mediodía,
   anomalías puntuales, único holdout, test elige familia, viento fuera de alcance).
 - [x] *Hacer el dashboard ejecutable* (2026-11-16): versionados los 3,5 MB de data/processed/dashboard/ y
   agregados dashboard/requirements.txt y requirements-precomputo.txt; verificado con un clon limpio. Era:
   versionar data/processed/dashboard/ + requirements.txt (streamlit,
   altair, pandas, pyarrow con versiones), o desplegar y entregar el link. Probar con un clon limpio.
-- [ ] *Unificar cifras* (E3): recalcular "cero" sobre X_test y usar el mismo % de mejora en informe y tablero.
+- [x] *Unificar cifras* (E3), hecho el 2026-11-16 en nb 7 §12: informe, tabla de comparación, nb 8 y dashboard
+  usan hoy el mismo `cero = 1,4435` y los mismos porcentajes de mejora.
 
 *Alta relación valor/esfuerzo (si queda tiempo hoy)*
 - [x] nb 8 §9.2: tabla pre/post por fcst_pop_pct ≥ 30 (lluvia) y por terciles de viento pronosticado (E9).
