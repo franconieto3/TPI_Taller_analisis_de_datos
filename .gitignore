@@ -28,6 +28,17 @@ __pycache__/
 /TP3/dashboard/*
 !/TP3/dashboard/*.py
 !/TP3/dashboard/.streamlit/
+!/TP3/dashboard/requirements*.txt
+
+# Excepcion a "/TP3/*": los 3,5 MB que precomputo.py deja en TP3/data/processed/dashboard/.
+# Sin esto el tablero no lo puede abrir un tercero que clone el repo: precomputo.py necesita
+# el .joblib del Random Forest (1,1 GB, fuera de git). app.py solo lee estos archivos.
+# Hay que reabrir cada nivel de directorio, porque "/TP3/*" ya excluyo TP3/data.
+!/TP3/data/
+/TP3/data/*
+!/TP3/data/processed/
+/TP3/data/processed/*
+!/TP3/data/processed/dashboard/
 
 # Documentacion de decisiones: los .md de cada TP (planes, pendientes, auditorias,
 # historial de hallazgos). Aportan el contexto de por que el pipeline es como es.

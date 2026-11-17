@@ -1,0 +1,48 @@
+{
+  "variable": "temp_c",
+  "filas_test": 47151,
+  "estaciones_test": 432,
+  "desde": "2026-11-10 00:00:00",
+  "hasta": "2026-11-15 02:00:00",
+  "mae_naive_persistencia": 1.7897,
+  "umbral_kpi_c": 1.0,
+  "nivel_intervalo": 0.8,
+  "dias_calibracion": 2,
+  "cobertura_observada": 0.8128,
+  "ancho_medio_banda_c": 3.7181,
+  "modelos": [
+    {
+      "modelo": "cero (no corregir)",
+      "MAE": 1.4435,
+      "RMSE": 1.8311,
+      "sesgo_medio": -0.1353,
+      "p90_abs": 3.0,
+      "mejora_vs_cero_pct": 0.0,
+      "mejora_vs_cero_c": 0.0,
+      "pct_error_menor_1.0c": 42.57,
+      "MASE": 0.8066
+    },
+    {
+      "modelo": "interpretable (DecisionTreeRegressor)",
+      "MAE": 1.2147,
+      "RMSE": 1.5683,
+      "sesgo_medio": -0.0177,
+      "p90_abs": 2.5296,
+      "mejora_vs_cero_pct": 15.85,
+      "mejora_vs_cero_c": 0.2288,
+      "pct_error_menor_1.0c": 50.33,
+      "MASE": 0.6787
+    },
+    {
+      "modelo": "min_error (RandomForestRegressor)",
+      "MAE": 1.141,
+      "RMSE": 1.4823,
+      "sesgo_medio": 0.0157,
+      "p90_abs": 2.3695,
+      "mejora_vs_cero_pct": 20.96,
+      "mejora_vs_cero_c": 0.3025,
+      "pct_error_menor_1.0c": 53.32,
+      "MASE": 0.6375
+    }
+  ]
+}
