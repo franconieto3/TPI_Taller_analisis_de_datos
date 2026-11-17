@@ -196,12 +196,17 @@ def panel_monitoreo(d: pd.DataFrame, estacion: str, mostrar_banda: bool) -> alt.
 
 def mapa_mejora(por_estacion: pd.DataFrame, estados: list | None) -> alt.Chart:
     """432 estaciones coloreadas por mejora relativa: polaridad (mejora o empeora), así que divergente con gris
-    en el centro -no un secuencial, que no distinguiría el signo."""
+    en el centro -no un secuencial, que no distinguiría el signo.
+
+    DIVERGENTE va invertido (rojo-a-azul, no azul-a-rojo): esa lista es la misma que utils.py usa para
+    correlaciones, donde el signo no es bueno ni malo. Acá sí lo es -mejora es que gane el Random Forest (AZUL
+    en el resto del tablero)-, así que mejora tiene que quedar del lado azul y empeora del lado rojo, o el mapa
+    contradice el color que el lector ya aprendió en los KPIs y las series."""
     limite = float(por_estacion['mejora_pct'].abs().quantile(0.95))
     puntos = alt.Chart(por_estacion).mark_circle(size=42, stroke=GRIS_NEUTRO, strokeWidth=0.3).encode(
         longitude='longitud:Q', latitude='latitud:Q',
         color=alt.Color('mejora_pct:Q', title='mejora (%)',
-                        scale=alt.Scale(range=DIVERGENTE, domain=[-limite, limite], clamp=True)),
+                        scale=alt.Scale(range=list(reversed(DIVERGENTE)), domain=[-limite, limite], clamp=True)),
         tooltip=[alt.Tooltip('station_id:N', title='estación'), alt.Tooltip('estado:N'),
                  alt.Tooltip('bioma:N'), alt.Tooltip('MAE_sin:Q', title='MAE sin corregir', format='.2f'),
                  alt.Tooltip('MAE_con:Q', title='MAE corregido', format='.2f'),

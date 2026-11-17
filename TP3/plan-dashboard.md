@@ -199,8 +199,14 @@ de un minuto. Requiere `pyarrow` (instalado 2026-11-16) y `shap` sólo si se pid
 `sklearn` ni toca los `.joblib`. Para correrla:
 
 ```
-python -m streamlit run TP3/dashboard/app.py
+pip install -r TP3/dashboard/requirements.txt
+cd TP3/dashboard && python -m streamlit run app.py
 ```
+
+Correrla **desde `TP3/dashboard`** no es cosmético: Streamlit busca la config en `$CWD/.streamlit/`, no en el
+directorio del script. Lanzada desde la raíz del repo tomaría `/.streamlit/config.toml` -que existe por el deploy
+(sección 8) y dice lo mismo-; desde cualquier otro directorio no encontraría ninguna de las dos y el tablero
+heredaría el tema del sistema, renderizando la paleta sobre un fondo para el que no se validó el contraste.
 
 Implementa los 14 componentes de las secciones 1-3 en tres `st.tabs` (Resumen / Explicabilidad / Detalle técnico) y
 la fila de filtros de la sección 4 en la barra lateral, delimitando sólo los dos niveles abiertos -el Resumen es
@@ -226,3 +232,47 @@ apagada, y el caso borde de una combinación (estado, bioma) sin ninguna fila, d
 avisan y el Resumen sigue en pie.
 
 Pendiente de la Etapa C: nada bloqueante. Queda el informe (entregable 3).
+
+## 8. Deploy en Streamlit Community Cloud — preparado (2026-11-17)
+
+El repo quedó listo para desplegar; falta sólo crear la app en share.streamlit.io, que es manual:
+
+| Campo | Valor |
+|---|---|
+| Repository | `franconieto3/TPI_Taller_analisis_de_datos` |
+| Branch | `master` |
+| Main file path | `TP3/dashboard/app.py` |
+| Python version (*Advanced settings*) | 3.11, 3.12 o 3.13 -las tres resuelven; ver abajo |
+
+Cloud encuentra `requirements.txt` porque lo busca primero en el directorio del *entrypoint*
+(`TP3/dashboard/`) y después en la raíz. No hace falta `packages.txt`: las dependencias de sistema
+(`geopandas`) viven sólo en `requirements-precomputo.txt`, que Cloud no instala.
+
+Tres cosas tuvieron que cambiar para que el deploy no saliera roto, y vale la pena no deshacerlas:
+
+1. **`requirements.txt` pasó de pines exactos a rangos.** La corrida oficial es con Python 3.15 local, y Cloud
+   corre uno más viejo: pedir `pandas==3.0.6` ahí es apostar a que exista ese wheel. Los pisos **no** son
+   negociables -`streamlit>=1.49` porque `app.py` pasa `width='stretch'` a `st.altair_chart`, `st.dataframe` y
+   `form_submit_button` (antes de 1.49 ese parámetro era `use_container_width` y la app no arranca), y
+   `altair>=5.5` porque `paleta.py` usa `alt.theme.register`, que en 5.4 era `alt.themes.register`. Las versiones
+   exactas de la entrega quedaron en **`requirements-lock.txt`**, de donde ahora hereda
+   `requirements-precomputo.txt` (flujo local, donde el punto es reproducir bit a bit).
+   Verificado con `pip install --dry-run --python-version {3.11,3.12,3.13} --only-binary=:all:`: resuelve en las
+   tres. Con rangos, `pandas` puede resolver a una versión más nueva que la de la entrega: para reproducir las
+   cifras exactas hay que usar el lock.
+2. **`/.streamlit/config.toml`** (copia de la de `TP3/dashboard/`, con excepción nueva en `.gitignore`). Cloud
+   clona el repo y corre con el CWD en la raíz, donde la config de `TP3/dashboard/.streamlit/` es invisible. Sin
+   esta copia el tablero se desplegaba con el tema del sistema del visitante. **Las dos tienen que decir lo
+   mismo**: si se toca una, tocar la otra.
+3. **`TP3/data/out/modelado/` entró a git** (215 KB). El nivel "Detalle técnico" lee de ahí
+   `tabla_validez_target.csv` y `tabla_resumen_split.csv` (`app.py:637-638`); fuera de git esos dos paneles
+   salían vacíos en el deploy y en cualquier clon, en silencio, porque `cargar_csv` devuelve `None` si el archivo
+   no está.
+
+Verificación: se materializó el índice de git en un directorio limpio (`git checkout-index --prefix=`) y se corrió
+`AppTest` ahí -0 excepciones, 13 tablas, y las dos del punto 3 presentes-, más la resolución de la config desde la
+raíz (`theme.base = light`).
+
+Nota sobre las cifras del panel de cobertura: `tabla_resumen_split.csv` dice 54.243 filas de test y el tablero
+evalúa 47.151. No es una inconsistencia -son universos distintos: 54.243 filas del split crudo → 47.694 con
+target válido → 47.151 sin faltantes en features-, y el `st.caption` debajo de las tablas ya lo declara.

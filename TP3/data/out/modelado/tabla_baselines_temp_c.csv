@@ -1,0 +1,11 @@
+modelo,split,MAE,RMSE,n
+cero (no corregir),train,1.444,1.841,97491
+cero (no corregir),test,1.436,1.825,32214
+naive,train,1.8,2.313,97491
+naive,test,1.788,2.287,32214
+naive_estacional,train,1.555,2.029,97491
+naive_estacional,test,1.591,2.076,32214
+media_movil,train,1.62,2.057,97491
+media_movil,test,1.602,2.031,32214
+drift,train,3.002,3.838,97491
+drift,test,2.961,3.768,32214

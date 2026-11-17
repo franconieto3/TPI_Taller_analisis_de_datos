@@ -1,19 +1,31 @@
 # TP3 - Dashboard (Etapa C): dependencias para EJECUTAR el tablero.
 #
 #   pip install -r TP3/dashboard/requirements.txt
-#   streamlit run TP3/dashboard/app.py
+#   cd TP3/dashboard && python -m streamlit run app.py
 #
 # No hace falta nada mas: los datos que el tablero lee ya estan versionados en
 # TP3/data/processed/dashboard/ (3,5 MB), asi que app.py no necesita scikit-learn,
 # no importa los .joblib y no vuelve a correr precomputo.py.
 #
-# Para REGENERAR esos datos (requiere el modelo de 1,1 GB, que no esta en git):
-#   pip install -r TP3/dashboard/requirements-precomputo.txt
+# RANGOS, no pines exactos: este es el archivo que lee Streamlit Community Cloud,
+# que corre sobre un Python mas viejo que el 3.15 local y no tiene wheels para las
+# versiones de la corrida oficial. Los pisos no son decorativos:
 #
-# Probado con Python 3.15.0 en Windows 10. Versiones fijas a la corrida oficial
-# del 2026-11-15/16.
+#   - streamlit >= 1.49: app.py pasa width='stretch' a st.altair_chart, st.dataframe
+#     y form_submit_button. Antes de 1.49 ese parametro no existe (era
+#     use_container_width) y el tablero no arranca.
+#   - altair >= 5.5: paleta.py usa alt.theme.register, que en 5.4 y antes era
+#     alt.themes.register.
+#   - los techos de major cortan antes del proximo cambio incompatible.
+#
+# Las versiones exactas con las que se produjo la entrega estan en
+# requirements-lock.txt; usar ese archivo para reproducir la corrida oficial.
+#
+# Para REGENERAR los datos del tablero (requiere el modelo de 1,1 GB, fuera de git):
+#   pip install -r TP3/dashboard/requirements-precomputo.txt
+#   python TP3/dashboard/precomputo.py
 
-streamlit==1.67.0
-altair==6.3.0
-pandas==3.0.6
-pyarrow==26.0.1
+streamlit>=1.49,<2
+altair>=5.5,<7
+pandas>=2.2,<4
+pyarrow>=14

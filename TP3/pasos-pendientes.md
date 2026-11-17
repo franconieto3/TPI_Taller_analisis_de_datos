@@ -110,8 +110,14 @@ separación train/test temporal (corte fijo, sin gap porque todas las features m
    en los primeros 2 días del test y medida en los 3 restantes -cobertura observada 81,3% contra 80% nominal.
    Calibrarla con residuos de train daba 55,4%: ver `plan-dashboard.md`, sección 5.
 
-Para correrlo: `python TP3/dashboard/precomputo.py` y después
-`python -m streamlit run TP3/dashboard/app.py`.
+Para correrlo (los datos ya están versionados, no hace falta `precomputo.py`):
+`pip install -r TP3/dashboard/requirements.txt` y después `cd TP3/dashboard && python -m streamlit run app.py`
+-desde ese directorio, para que Streamlit encuentre el tema en `.streamlit/config.toml`.
+
+**Deploy**: el repo quedó listo para Streamlit Community Cloud el 2026-11-17 (entrypoint `TP3/dashboard/app.py`,
+rangos de versión en `requirements.txt` + `requirements-lock.txt` para la corrida exacta, copia de la config en
+`/.streamlit/`, y `data/out/modelado/` versionado). El detalle y el por qué de cada cambio, en
+`plan-dashboard.md` §8. Falta sólo crear la app en share.streamlit.io y pegar el link.
 
 ### 5. Informe (entregable 3) — ✅ hecho (v1 el 2026-11-16)
 

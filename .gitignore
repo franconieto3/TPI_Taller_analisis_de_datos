@@ -7,6 +7,13 @@
 !/TP2/
 !/TP3/
 
+# Excepcion a "/*": el tema del tablero para cuando el CWD es la raiz del repo
+# ("streamlit run TP3/dashboard/app.py" desde aca, y Streamlit Community Cloud, que
+# corre desde la raiz). Streamlit busca la config en $CWD/.streamlit/, no en el
+# directorio del script: sin esta copia el tablero hereda el tema del sistema y la
+# paleta se renderiza sobre un fondo para el que no se valido el contraste.
+!/.streamlit/
+
 # Dentro de ETL, solo los scripts
 /ETL/*
 !/ETL/*.py
@@ -48,6 +55,10 @@ __pycache__/
 /TP3/data/out/*
 !/TP3/data/out/interpretabilidad/
 !/TP3/data/out/modelado_global/
+# Y modelado/ (215 KB): el nivel "Detalle tecnico" del tablero lee de aca
+# tabla_validez_target.csv y tabla_resumen_split.csv (app.py:637-638). Sin esto esos
+# dos paneles salen vacios en cualquier clon del repo y en el deploy.
+!/TP3/data/out/modelado/
 
 # Documentacion de decisiones: los .md de cada TP (planes, pendientes, auditorias,
 # historial de hallazgos). Aportan el contexto de por que el pipeline es como es.

@@ -1,0 +1,15 @@
+# TP3 - Dashboard: versiones EXACTAS de la corrida oficial del 2026-11-15/16,
+# con Python 3.15.0 en Windows 10.
+#
+#   pip install -r TP3/dashboard/requirements-lock.txt
+#
+# Para que cualquiera reproduzca el tablero bit a bit con el mismo interprete.
+# requirements.txt (rangos) existe aparte porque Streamlit Community Cloud corre
+# sobre un Python mas viejo, para el que estas versiones no tienen wheel.
+#
+# Si se cambia una version aca, actualizar tambien el piso en requirements.txt.
+
+streamlit==1.67.0
+altair==6.3.0
+pandas==3.0.6
+pyarrow==26.0.1

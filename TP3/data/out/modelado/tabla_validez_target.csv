@@ -1,0 +1,5 @@
+variable,target_valido,target_valido_pct,invalido_hora_imputada,invalido_otro_motivo
+temp_c,227862,79.6,41087,17260
+rh_pct,227780,79.6,41049,17380
+dewpoint_c,227919,79.6,41192,17098
+windspeed_kmh,228507,79.8,41373,16329

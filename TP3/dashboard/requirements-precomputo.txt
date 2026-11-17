@@ -7,10 +7,12 @@
 # TP3/data/processed/modelos/modelo_min_error_temp_c.joblib (1,1 GB, fuera de git
 # por tamanio). Para solo abrir el tablero alcanza con requirements.txt.
 #
+# Hereda del LOCK, no de requirements.txt (que lleva rangos para el deploy): este
+# es un flujo local donde el punto es reproducir la corrida oficial exactamente.
 # scikit-learn va fijado a la version que creo el .joblib: cargar un pickle de
 # sklearn con otra version puede fallar o cambiar resultados en silencio.
 
--r requirements.txt
+-r requirements-lock.txt
 
 numpy==2.5.4
 joblib==1.6.0

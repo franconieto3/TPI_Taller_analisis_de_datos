@@ -1,5 +1,12 @@
-# Tema fijo en claro: la paleta de los gráficos se validó contra una superficie clara
-# (ver paleta.py). Dejarlo a merced del tema del sistema haría que los colores se
+# COPIA de /.streamlit/config.toml (raiz del repo). Las dos tienen que decir lo mismo:
+# si se toca una, tocar la otra.
+#
+# Streamlit busca la config en $CWD/.streamlit/, no en el directorio del script, asi
+# que hacen falta las dos: esta aplica cuando se corre desde TP3/dashboard, la de la
+# raiz cuando el CWD es la raiz del repo (incluido Streamlit Community Cloud).
+#
+# Tema fijo en claro: la paleta de los graficos se validó contra una superficie clara
+# (ver paleta.py). Dejarlo a merced del tema del sistema haria que los colores se
 # rendericen sobre un fondo para el que no se validó el contraste.
 [theme]
 base = "light"

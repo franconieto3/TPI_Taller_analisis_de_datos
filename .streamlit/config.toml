@@ -1,0 +1,21 @@
+# COPIA de TP3/dashboard/.streamlit/config.toml. Las dos tienen que decir lo mismo:
+# si se toca una, tocar la otra.
+#
+# Existe porque Streamlit busca la config en $CWD/.streamlit/, no en el directorio
+# del script. Esta copia cubre los dos casos en que el CWD es la raiz del repo:
+#   - "python -m streamlit run TP3/dashboard/app.py" desde la raiz
+#   - Streamlit Community Cloud, que clona el repo y corre desde la raiz
+# Sin ella el tablero hereda el tema del sistema.
+#
+# Tema fijo en claro: la paleta de los graficos se valido contra una superficie clara
+# (ver TP3/dashboard/paleta.py). Dejarlo a merced del tema del sistema haria que los
+# colores se rendericen sobre un fondo para el que no se validó el contraste.
+[theme]
+base = "light"
+primaryColor = "#2a78d6"
+backgroundColor = "#fcfcfb"
+secondaryBackgroundColor = "#f0efec"
+textColor = "#2e2d2b"
+
+[server]
+headless = true
