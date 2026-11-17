@@ -28,6 +28,7 @@ __pycache__/
 /TP3/dashboard/*
 !/TP3/dashboard/*.py
 !/TP3/dashboard/.streamlit/
+!/TP3/dashboard/requirements*.txt
 
 # Excepcion a "/TP3/*": los 3,5 MB que precomputo.py deja en TP3/data/processed/dashboard/.
 # Sin esto el tablero no lo puede abrir un tercero que clone el repo: precomputo.py necesita

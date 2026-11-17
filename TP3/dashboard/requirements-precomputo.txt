@@ -1,0 +1,23 @@
+# TP3 - Dependencias para REGENERAR los datos del tablero con precomputo.py.
+#
+#   pip install -r TP3/dashboard/requirements-precomputo.txt
+#   python TP3/dashboard/precomputo.py
+#
+# Solo hace falta si se reentrenan los modelos: requiere
+# TP3/data/processed/modelos/modelo_min_error_temp_c.joblib (1,1 GB, fuera de git
+# por tamanio). Para solo abrir el tablero alcanza con requirements.txt.
+#
+# scikit-learn va fijado a la version que creo el .joblib: cargar un pickle de
+# sklearn con otra version puede fallar o cambiar resultados en silencio.
+
+-r requirements.txt
+
+numpy==2.5.4
+joblib==1.6.0
+scikit-learn==1.9.1
+
+# Opcionales, segun que salida se quiera regenerar:
+# - shap: solo para shap_muestra.parquet (beeswarm del nivel 2 del tablero)
+# - geopandas: solo para estados.geojson (mapa por estado)
+shap==0.54.1
+geopandas==1.2.0
